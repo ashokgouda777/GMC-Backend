@@ -275,6 +275,9 @@ public class PaymentController : ControllerBase
 
 
 
+
+
+
     [AllowAnonymous]
     [HttpPost("Webhook")]
     public async Task<IActionResult> Webhook()
@@ -451,9 +454,95 @@ public class PaymentController : ControllerBase
 
 
 
+    [AllowAnonymous]
+    [HttpGet("cashbooksearch")]
+    public async Task<IActionResult> cashbooksearch(string? receiptNumber)
+    {
+        var query =
+            from renewal in _context.RenewalHistory
 
+            join fee in _context.GroupLedgerMaster
+                on renewal.PaymentFor equals fee.LedgerID.ToString()
 
+            join receipt in _context.FeesReceipt
+                on renewal.ReceiptNumber equals receipt.ReceiptNumber
 
+            join feelink in _context.LedgerFeeItemLink
+                on renewal.PaymentFor equals feelink.LedgerID.ToString()
+
+            join feeitm in _context.FeesItems
+                on feelink.FeeItemID equals feeitm.FeeItemId.ToString()
+
+            join practitioner in _context.Practitioners
+                on renewal.PractitionerID equals practitioner.PractitionerID
+
+            select new
+            {
+                feeitm.FeeItemName,
+                fee.LedgerDescription,
+                receipt.FinancialYear,
+                receipt.AccountNo,
+                receipt.Remarks,
+                renewal.Type,
+                renewal.ReceiptNumber,
+                renewal.ReceiptDate,
+                renewal.TransactionNo,
+                renewal.TransactionDate,
+                renewal.Bank,
+                renewal.Amount,
+                renewal.RenewalID,
+                renewal.CreatedBy,
+                renewal.UpdatedBy,
+                renewal.CreatedOn
+            };
+
+     
+        // 🔥 Special cases for receiptNumber
+        if (!string.IsNullOrEmpty(receiptNumber))
+        {
+            if (receiptNumber.ToLower() == "first")
+            {
+                var firstData = await query
+                    .OrderBy(x => x.CreatedOn) // oldest
+                    .Take(1)
+                    .ToListAsync();
+
+                return Ok(firstData);
+            }
+            else if (receiptNumber.ToLower() == "last")
+            {
+                var lastData = await query
+                    .OrderByDescending(x => x.CreatedOn) // latest
+                    .Take(1)
+                    .ToListAsync();
+
+                return Ok(lastData);
+            }
+            else
+            {
+                // Normal receipt filter
+                query = query.Where(x => x.ReceiptNumber == receiptNumber);
+            }
+        }
+
+        // 📌 If NO filters → return TOP 1 latest
+        if (string.IsNullOrEmpty(receiptNumber))
+        {
+            var topData = await query
+                .OrderByDescending(x => x.CreatedOn)
+                .Take(1)
+                .ToListAsync();
+
+            return Ok(topData);
+        }
+
+        // 📌 Return filtered data
+        var filteredData = await query
+            .OrderByDescending(x => x.CreatedOn)
+            .ToListAsync();
+
+        return Ok(filteredData);
+    }
 
 
 }
