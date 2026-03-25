@@ -98,7 +98,7 @@ namespace GMC.Controllers
             return Ok(nation);
         }
 
-       
+
 
         [HttpGet("countrymaster")]
         public async Task<IActionResult> countrymaster()
@@ -153,7 +153,7 @@ namespace GMC.Controllers
         public async Task<IActionResult> coursemaster()
         {
             var nation = await _context.CourseMaster
-                
+
                 .Select(r => new
                 {
                     CourseId = r.CourseId,
@@ -177,7 +177,7 @@ namespace GMC.Controllers
 
             return Ok(nation);
         }
-       
+
         [HttpGet("colleges")]
         public async Task<IActionResult> GetColleges(string universityId)
         {
@@ -185,8 +185,8 @@ namespace GMC.Controllers
                 .Where(r => r.UniversityName == universityId)
                 .Select(r => new
                 {
-                  colid=r.ColId,
-                  colname= r.ColName
+                    colid = r.ColId,
+                    colname = r.ColName
 
                 })
                 .ToListAsync();
@@ -218,7 +218,7 @@ namespace GMC.Controllers
                 data = model
             });
         }
-        [AllowAnonymous]
+        
         [HttpGet("GetLedger")]
         public async Task<IActionResult> GetLedger()
         {
@@ -228,11 +228,11 @@ namespace GMC.Controllers
                     on gl.LedgerID equals lf.LedgerID
                 join fi in _context.FeesItems
                     on Convert.ToInt32(lf.FeeItemID) equals fi.FeeItemId
-                where gl.LedgerStatus=="A"
+                where gl.LedgerStatus == "A"
                 select new
                 {
                     LedgerID = gl.LedgerID,
-                    LedgerName = gl.LedgerDescription??"",
+                    LedgerName = gl.LedgerDescription ?? "",
                     FeeItemID = fi.FeeItemId,
                     FeeItemName = fi.FeeItemName,
                     FeeAmount = fi.FeeAmount,
@@ -252,7 +252,7 @@ namespace GMC.Controllers
                 .Select(r => new
                 {
                     years = r.FinancialYear,
-                    
+
                 })
                 .ToListAsync();
 
@@ -290,20 +290,6 @@ namespace GMC.Controllers
 
             return Ok(nation);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpGet("statemastersget")]
         public async Task<IActionResult> GetStateMaster()
         {
@@ -560,8 +546,8 @@ namespace GMC.Controllers
                 data = country
             });
         }
-        //kkkkkkk
-       /* [HttpGet("districtmastersget")]
+
+        [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
             try
@@ -583,7 +569,7 @@ namespace GMC.Controllers
                             StateId = dc.d.StateId,
                             StateName = s.StateName ?? "Unknown",
                             DistrictName = dc.d.DistrictName ?? "",
-                            Active = dc.d.Active ?? "No"
+                            
                         })
                     .ToListAsync();
 
@@ -593,9 +579,9 @@ namespace GMC.Controllers
             {
                 return StatusCode(500, new { message = ex.Message });
             }
-        }*/
+        }
 
-     /*   [HttpPost("districtmasterspost")]
+        [HttpPost("districtmasterspost")]
         public async Task<IActionResult> CreateDistrictMaster([FromBody] DistrictMaster model)
         {
             try
@@ -620,7 +606,7 @@ namespace GMC.Controllers
                 }
 
                 model.CreatedOn = DateTime.Now;
-                model.Active = string.IsNullOrEmpty(model.Active) ? "Yes" : model.Active;
+                //model.Active = string.IsNullOrEmpty(model.Active) ? "Yes" : model.Active;
 
                 _context.DistrictMaster.Add(model);
                 await _context.SaveChangesAsync();
@@ -632,8 +618,8 @@ namespace GMC.Controllers
                 var innerMsg = ex.InnerException != null ? $"; Inner: {ex.InnerException.Message}" : "";
                 return StatusCode(500, new { message = "Backend Error: " + ex.Message + innerMsg });
             }
-        }*/
-/*
+        }
+
         [HttpPut("districtmastersupdate/{id}")]
         public async Task<IActionResult> UpdateDistrictMaster(string id, [FromBody] DistrictMaster model)
         {
@@ -646,7 +632,7 @@ namespace GMC.Controllers
                 district.DistrictName = model.DistrictName;
                 district.StateId = model.StateId;
                 district.CountryId = model.CountryId;
-                district.Active = model.Active;
+                //district.Active = model.Active;
                 district.UpdatedOn = DateTime.Now;
 
                 await _context.SaveChangesAsync();
@@ -657,8 +643,7 @@ namespace GMC.Controllers
             {
                 return StatusCode(500, new { message = ex.Message });
             }
-        }*/
-//check commite
+        }
 
         [HttpDelete("districtmastersdelete/{id}")]
         public async Task<IActionResult> DeleteDistrictMaster(string id)
@@ -696,21 +681,22 @@ namespace GMC.Controllers
             }
         }
 
-      /*  [HttpPost("coursemasterspost")]
+        [HttpPost("coursemasterspost")]
         public async Task<IActionResult> CreateCourseMaster([FromBody] CourseMaster model)
         {
             try
             {
                 if (model == null) return BadRequest(new { message = "Invalid course model" });
 
-                if (string.IsNullOrEmpty(model.CourseName))
+                if (string.IsNullOrEmpty(model.CourseDescription))
                 {
                     return BadRequest(new { message = "Course name is required." });
                 }
 
-                if (string.IsNullOrEmpty(model.Id))
+                if (string.IsNullOrEmpty(model.CourseId))
+
                 {
-                    model.Id = Guid.NewGuid().ToString();
+                    model.CourseId = Guid.NewGuid().ToString();
                 }
 
                 model.CreatedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -726,9 +712,9 @@ namespace GMC.Controllers
                 var innerMsg = ex.InnerException != null ? $"; Inner: {ex.InnerException.Message}" : "";
                 return StatusCode(500, new { message = "Backend Error: " + ex.Message + innerMsg });
             }
-        }*/
+        }
 
-     /*   [HttpPut("coursemastersupdate/{id}")]
+        [HttpPut("coursemastersupdate/{id}")]
         public async Task<IActionResult> UpdateCourseMaster(string id, [FromBody] CourseMaster model)
         {
             try
@@ -736,12 +722,12 @@ namespace GMC.Controllers
                 var course = await _context.CourseMaster.FindAsync(id);
                 if (course == null) return NotFound("Course not found");
 
-                course.CourseName = model.CourseName;
-                course.ShortcutCode = model.ShortcutCode;
-                course.Nomenclature = model.Nomenclature;
+                course.CourseDescription = model.CourseDescription;
+                course.CourseShortCode = model.CourseShortCode;
+                course.CourseNomeclature = model.CourseNomeclature;
                 course.AdditionalDegree = model.AdditionalDegree;
                 course.Status = model.Status;
-                course.Active = model.Active;
+               
 
 
                 course.UpdatedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -753,7 +739,7 @@ namespace GMC.Controllers
             {
                 return StatusCode(500, new { message = ex.Message });
             }
-        }*/
+        }
 
         [HttpDelete("coursemastersdelete/{id}")]
         public async Task<IActionResult> DeleteCourseMaster(string id)
@@ -773,12 +759,12 @@ namespace GMC.Controllers
             }
         }
 
-    /*    [HttpGet("mdssubjectmastersget")]
+        [HttpGet("mdssubjectmastersget")]
         public async Task<IActionResult> GetMdsSubjectMaster()
         {
             try
             {
-                var subjects = await _context.MdsSubjectMasters
+                var subjects = await _context.MdsSubjectMaster
                     .AsNoTracking()
                     .ToListAsync();
                 return Ok(subjects);
@@ -787,9 +773,9 @@ namespace GMC.Controllers
             {
                 return StatusCode(500, new { message = ex.Message });
             }
-        }*/
+        }
 
-        /*[HttpPost("mdssubjectmasterspost")]
+        [HttpPost("mdssubjectmasterspost")]
         public async Task<IActionResult> CreateMdsSubjectMaster([FromBody] MdsSubjectMaster model)
         {
             try
@@ -811,7 +797,7 @@ namespace GMC.Controllers
 
 
 
-                _context.MdsSubjectMasters.Add(model);
+                _context.MdsSubjectMaster.Add(model);
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Subject saved successfully", data = model });
@@ -821,14 +807,14 @@ namespace GMC.Controllers
                 var innerMsg = ex.InnerException != null ? $"; Inner: {ex.InnerException.Message}" : "";
                 return StatusCode(500, new { message = "Backend Error: " + ex.Message + innerMsg });
             }
-        }*/
+        }
 
-        /*[HttpPut("mdssubjectmastersupdate/{id}")]
+        [HttpPut("mdssubjectmastersupdate/{id}")]
         public async Task<IActionResult> UpdateMdsSubjectMaster(string id, [FromBody] MdsSubjectMaster model)
         {
             try
             {
-                var subject = await _context.MdsSubjectMasters.FirstOrDefaultAsync(s => s.Sub_code == id);
+                var subject = await _context.MdsSubjectMaster.FirstOrDefaultAsync(s => s.Sub_code == id);
                 if (subject == null) return NotFound("Subject not found");
 
                 subject.Sub_name = model.Sub_name;
@@ -849,17 +835,17 @@ namespace GMC.Controllers
             {
                 return StatusCode(500, new { message = ex.Message });
             }
-        }*/
+        }
 
-       /* [HttpDelete("mdssubjectmastersdelete/{id}")]
+        [HttpDelete("mdssubjectmastersdelete/{id}")]
         public async Task<IActionResult> DeleteMdsSubjectMaster(string id)
         {
             try
             {
-                var subject = await _context.MdsSubjectMasters.FirstOrDefaultAsync(s => s.Sub_code == id);
+                var subject = await _context.MdsSubjectMaster.FirstOrDefaultAsync(s => s.Sub_code == id);
                 if (subject == null) return NotFound("Subject not found");
 
-                _context.MdsSubjectMasters.Remove(subject);
+                _context.MdsSubjectMaster.Remove(subject);
                 await _context.SaveChangesAsync();
                 return Ok(new { message = "Subject deleted successfully" });
             }
@@ -868,7 +854,20 @@ namespace GMC.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
 
-        }*/
+        }
+        [HttpGet("universityget/{id}")]
+        public async Task<ActionResult<University>> GetUniversity(string id)
+        {
+            var university = await _context.University
+                .Where(u => u.UniversityId == id)
+                .FirstOrDefaultAsync();
+
+            if (university == null)
+                return NotFound();
+
+            return university;
+        }
+        [AllowAnonymous]
         [HttpGet("universitymastersget")]
         public async Task<IActionResult> GetUniversities()
         {
@@ -892,78 +891,75 @@ namespace GMC.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
-        [HttpGet("universityget/{id}")]
-        public async Task<ActionResult<University>> GetUniversity(string id)
-        {
-            var university = await _context.University
-                .Where(u => u.UniversityId == id)
-                .FirstOrDefaultAsync();
-
-            if (university == null)
-                return NotFound();
-
-            return university;
-        }
+        [AllowAnonymous]
         [HttpPost("universitypost")]
-        public async Task<ActionResult<University>> PostUniversity([FromBody] University university)
+        public async Task<IActionResult> PostUniversity([FromBody] University model)
         {
-            if (university == null)
-                return BadRequest("Invalid data");
+            try
+            {
+                if (model == null)
+                    return BadRequest("Invalid data");
 
-            if (string.IsNullOrEmpty(university.UniversityCode))
-                return BadRequest("University Code is required (max 5 characters).");
+                if (string.IsNullOrEmpty(model.UniversityCode))
+                    return BadRequest("University Code is required.");
 
-            if (university.UniversityCode.Length > 5)
-                return BadRequest("University Code cannot exceed 5 characters.");
+               
 
-            university.UniversityId = GenerateUniversityId();
-            university.Status = "Active";
-            university.CreatedOn = DateTime.Now;
+                // 🔍 Check if exists
+                var existing = await _context.University
+                    .FirstOrDefaultAsync(x => x.UniversityId == model.UniversityId);
 
-            _context.University.Add(university);
-            await _context.SaveChangesAsync();
+                if (existing == null)
+                {
+                    string uinid =  GenerateUniversityId();
+                    University uin = new University
+                    {
+                        CouncilId = "1",
+                        StateId = "1",
+                        UniversityCode = model.UniversityCode,
+                        CountryId = "1",
+                        UniversityName = model.UniversityName,
+                        Status = "A",
+                        UniversityId = uinid,
+                        CreatedBy = "Admin",
+                        CreatedOn = DateTime.Now
 
-            return CreatedAtAction(nameof(GetUniversity),
-                new { id = university.UniversityId }, university);
-        }
+                    };
 
+                    // ✅ INSERT
+                    _context.University.Add(uin);
+                    await _context.SaveChangesAsync();
 
+                    return Ok(new
+                    {
+                        message = "University created successfully",
+                        id = model.UniversityId
+                    });
+                }
+                else
+                {
+                    // ✅ UPDATE
+                    existing.UniversityName = model.UniversityName;
+                    existing.UniversityCode = model.UniversityCode;
+                    existing.UpdatedBy = model.UpdatedBy;
+                    existing.UpdatedOn = DateTime.Now;
 
-        [HttpPut("universityupdate/{id}")]
-        public async Task<IActionResult> PutUniversity(string id, [FromBody] University updatedUniversity)
-        {
-            var university = await _context.University.FindAsync(id);
-            if (university == null)
-                return NotFound();
+                    if (!string.IsNullOrEmpty(model.Status))
+                        existing.Status = model.Status;
 
-            university.UniversityName = updatedUniversity.UniversityName;
-            university.UniversityCode = updatedUniversity.UniversityCode;
-            university.UpdatedBy = updatedUniversity.UpdatedBy;
-            university.UpdatedOn = DateTime.Now;
+                    await _context.SaveChangesAsync();
 
-            if (!string.IsNullOrEmpty(updatedUniversity.Status))
-                university.Status = updatedUniversity.Status;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("universitydelete/{id}")]
-        public async Task<IActionResult> DeleteUniversity(string id)
-        {
-            var university = await _context.University.FindAsync(id);
-
-            if (university == null)
-                return NotFound();
-
-
-            university.Status = "D";
-            university.UpdatedOn = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                    return Ok(new
+                    {
+                        message = "University updated successfully",
+                        id = existing.UniversityId
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
         private string GenerateUniversityId()
         {
@@ -972,41 +968,7 @@ namespace GMC.Controllers
 
             return $"U{timestamp}{random}";
         }
-        [HttpPost("collegecreate")]
-        public async Task<IActionResult> CreateCollege([FromBody] College model)
-        {
-            if (model == null)
-                return BadRequest(new { message = "Invalid Data" });
-
-
-            if (string.IsNullOrEmpty(model.TelNumber) ||
-                !System.Text.RegularExpressions.Regex.IsMatch(model.TelNumber, @"^\d{10}$"))
-                return BadRequest(new { message = "Mobile number must be exactly 10 digits." });
-
-
-            if (!string.IsNullOrEmpty(model.Email) &&
-                !System.Text.RegularExpressions.Regex.IsMatch(model.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                return BadRequest(new { message = "Invalid email format." });
-
-            model.ColId = "COL" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
-
-            model.CreatedOn = DateTime.Now;
-            model.UpdatedOn = null;
-
-
-            model.Status = string.IsNullOrEmpty(model.Status) ? "A" : model.Status;
-
-            await _context.College.AddAsync(model);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "College Created Successfully",
-                data = model
-            });
-        }
-
-        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [AllowAnonymous]
         [HttpGet("collegesget")]
         public async Task<IActionResult> GetColleges()
         {
@@ -1014,7 +976,7 @@ namespace GMC.Controllers
             return Ok(colleges);
         }
 
-        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        
         [HttpGet("collegegetbyid/{id}")]
         public async Task<IActionResult> GetCollegeById(string id)
         {
@@ -1026,81 +988,87 @@ namespace GMC.Controllers
 
             return Ok(college);
         }
-        [HttpPut("collegeupdate/{id}")]
-        public async Task<IActionResult> UpdateCollege(string id, [FromBody] College model)
+        [AllowAnonymous]
+        [HttpPost("collegecreateorupdate")]
+        public async Task<IActionResult> CreateOrUpdateCollege([FromBody] College model)
         {
-            var existing = await _context.College
-                .FirstOrDefaultAsync(x => x.ColId == id);
+            if (model == null)
+                return BadRequest(new { message = "Invalid Data" });
 
-            if (existing == null)
-                return NotFound(new { message = "College not found" });
-
-            if (string.IsNullOrEmpty(model.TelNumber))
-                return BadRequest(new { message = "Mobile number is required." });
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(model.TelNumber, @"^\d{10}$"))
+            // Mobile validation
+            if (string.IsNullOrEmpty(model.TelNumber) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(model.TelNumber, @"^\d{10}$"))
                 return BadRequest(new { message = "Mobile number must be exactly 10 digits." });
 
+            // Email validation
+            if (!string.IsNullOrEmpty(model.Email) &&
+                !System.Text.RegularExpressions.Regex.IsMatch(model.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                return BadRequest(new { message = "Invalid email format." });
 
+            var existing = await _context.College
+                .FirstOrDefaultAsync(x => x.ColId == model.ColId);
 
-            existing.ColName = model.ColName;
-            existing.ColAddress = model.ColAddress;
-            existing.District = model.District;
-            existing.Type = model.Type;
-            existing.PrincipalName = model.PrincipalName;
-            existing.TelNumber = model.TelNumber;
-            existing.UniversityName = model.UniversityName;
-            existing.Email = model.Email;
-            existing.UpdatedBy = model.UpdatedBy;
-            existing.UpdatedOn = DateTime.Now;
-            existing.Status = model.Status ?? existing.Status;
-            existing.Country = model.Country;
-            existing.State = model.State;
-            existing.CollegeCode = model.CollegeCode;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-
+            if (existing == null)
             {
-                message = "College Updated Successfully",
-                data = existing
-            });
-        }
-        [HttpDelete("collegedelete/{id}")]
-        public async Task<IActionResult> DeleteCollege(string id)
-        {
-            var college = await _context.College
-                .FirstOrDefaultAsync(x => x.ColId == id);
+                // ✅ INSERT
+                string colId = "COL" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
 
-            if (college == null)
-                return NotFound(new { message = "College not found" });
+                College col = new College
+                {
+                    
+                    CouncilId = "1",
+                    ColId = colId,
+                    ColName = model.ColName,
+                    ColAddress = model.ColAddress,
+                    District = model.District,
+                    Type = model.Type,
+                    PrincipalName = model.PrincipalName,
+                    TelNumber = model.TelNumber,
+                    UniversityName = model.UniversityName,
+                    Email = model.Email,
+                    Country = model.Country,
+                    State = model.State,
+                    CollegeCode = model.CollegeCode,
+                    Status = "A",
+                    CreatedBy = "Admin",
+                    CreatedOn = DateTime.Now
+                };
 
-            college.Status = "Inactive";   // I = Inactive
-            college.UpdatedOn = DateTime.Now;
+                _context.College.Add(col);
+                await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+                return Ok(new
+                {
+                    message = "College Created Successfully",
+                    id = col.ColId
+                });
+            }
+            else
             {
-                message = "College set to Inactive",
-                status = college.Status
-            });
+                // ✅ UPDATE
+                existing.ColName = model.ColName;
+                existing.ColAddress = model.ColAddress;
+                existing.District = model.District;
+                existing.Type = model.Type;
+                existing.PrincipalName = model.PrincipalName;
+                existing.TelNumber = model.TelNumber;
+                existing.UniversityName = model.UniversityName;
+                existing.Email = model.Email;
+                existing.UpdatedBy = model.UpdatedBy;
+                existing.UpdatedOn = DateTime.Now;
+                existing.Country = model.Country;
+                existing.State = model.State;
+                existing.CollegeCode = model.CollegeCode;
 
+                await _context.SaveChangesAsync();
 
-
-
-
-
-
+                return Ok(new
+                {
+                    message = "College Updated Successfully",
+                    id = existing.ColId
+                });
+            }
         }
-
-
-
-
 
     }
-
-
-
 }

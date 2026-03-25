@@ -52,6 +52,8 @@ namespace GMC.Data
         public DbSet<CBGroupMaster> CBGroupMaster { get; set; }
         public DbSet<Financial_Year> Financial_Year { get; set; }
 
+        public DbSet<MdsSubjectMaster> MdsSubjectMaster { get; set; }
+
         public DbSet<RazorPayPaymentAttempt> RazorPayPaymentAttempt { get; set; }
     }
 }
