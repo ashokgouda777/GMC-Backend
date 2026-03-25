@@ -560,7 +560,7 @@ namespace GMC.Controllers
                 data = country
             });
         }
-
+        //kkkkkkk
        /* [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
@@ -658,6 +658,7 @@ namespace GMC.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }*/
+//check commite
 
         [HttpDelete("districtmastersdelete/{id}")]
         public async Task<IActionResult> DeleteDistrictMaster(string id)
