@@ -1,0 +1,358 @@
+﻿
+@{
+    var pid = ViewBag.PID;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Goa Medical Council</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            color: white;
+            padding: 18px 25px;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            left: 20px;
+            width: 65px;
+            height: 65px;
+            background: white;
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .badge {
+            position: absolute;
+            right: 20px;
+            background: #22c55e;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 13px;
+        }
+
+        .address {
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        /* PROFILE */
+        .profile {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        /* IMAGE BOX */
+        .img-box {
+            position: relative;
+            width: 140px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 12px;
+            border: 2px dashed #9ca3af;
+            overflow: hidden;
+        }
+
+            .img-box.small {
+                width: 140px;
+                height: 70px;
+            }
+
+            .img-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: none;
+            }
+
+        .img-text {
+            position: absolute;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        /* SECTIONS */
+        .section {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1e3a8a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .value {
+            font-weight: 600;
+        }
+
+        .card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        /* SIGN */
+        .sign-section {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .sign-box {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .sign-title {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #6b7280;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            background: #f1f5f9;
+            color: #6b7280;
+        }
+
+        /* RESPONSIVE */
+       {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <img src="Upload/Logo/1/2/2/GMC-logo.png" class="logo" />
+
+            <div class="header-text">
+                <div class="title">Goa Medical Council</div>
+                <div class="subtitle">Government of Goa</div>
+                <div class="address">Bambolim, Tiswadi, Goa, 403202</div>
+            </div>
+
+            <div class="badge">✔ Verified Practitioner</div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="profile">
+            <div class="img-box">
+                <img id="photo" />
+                <div class="img-text">Image Not Uploaded</div>
+            </div>
+
+            <div class="profile-info">
+                <div id="basic-top"></div>
+            </div>
+        </div>
+
+        <!-- BASIC -->
+        <div class="section">
+            <div class="section-title">Practitioner Info</div>
+            <div id="basic" class="grid"></div>
+        </div>
+
+        <!-- EDUCATION -->
+        <div class="section">
+            <div class="section-title">Education Details</div>
+            <div id="education"></div>
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="section">
+            <div class="section-title">Address Details</div>
+            <div id="address"></div>
+        </div>
+
+        <!-- SIGN -->
+        <div class="sign-section">
+            <div class="sign-box">
+
+                <div>
+                    <div class="sign-title">Signature</div>
+                    <div class="img-box small">
+                        <img id="sign" />
+                        <div class="img-text">Not Uploaded</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="sign-title">Thumb Impression</div>
+                    <div class="img-box small">
+                        <img id="thumb" />
+                        <div class="img-text">Not Uploaded</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            © Goa Medical Council | Official Record
+        </div>
+
+    </div>
+
+    <script>
+        const pid = "@pid";
+
+        function setImage(id, src) {
+            const img = document.getElementById(id);
+            const text = img.parentElement.querySelector(".img-text");
+
+            if (!src) {
+                img.style.display = "none";
+                text.style.display = "block";
+                return;
+            }
+
+            img.src = src;
+
+            img.onload = () => {
+                img.style.display = "block";
+                text.style.display = "none";
+            };
+
+            img.onerror = () => {
+                img.style.display = "none";
+                text.style.display = "block";
+            };
+        }
+
+        // BASIC
+        fetch(`/practitioner/basic/${pid}`)
+            .then(res => res.json())
+            .then(d => {
+
+                document.getElementById("basic-top").innerHTML = `
+                    <h2>${d.name || ''}</h2>
+                    <div>Registration No: ${d.registrationNo || ''}</div>
+                `;
+
+                document.getElementById("basic").innerHTML = `
+                <div class="field"><div class="label">Gender</div><div class="value">${d.gender ?? ''}</div></div>
+                <div class="field"><div class="label">Birth Date</div><div class="value">${d.birthDate ? d.birthDate.split('T')[0] : ''}</div></div>
+                <div class="field"><div class="label">Blood Group</div><div class="value">${d.bloodGroup ?? ''}</div></div>
+                <div class="field"><div class="label">Birth Place</div><div class="value">${d.birthPlace ?? ''}</div></div>
+                <div class="field"><div class="label">Nationality</div><div class="value">${d.nationality ?? ''}</div></div>
+                <div class="field"><div class="label">Mobile</div><div class="value">${d.mobileNumber ?? ''}</div></div>
+                <div class="field"><div class="label">Email</div><div class="value">${d.emailID ?? ''}</div></div>
+            `;
+
+
+                setImage("photo", d.photo);
+                setImage("sign", d.sign);
+                setImage("thumb", d.thumb);
+            });
+
+        // EDUCATION
+        fetch(`/practitioner/education/${pid}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = "";
+                data.forEach(e => {
+                    html += `<div class="card">${e.fullEducation || ''}</div>`;
+                });
+                document.getElementById("education").innerHTML = html;
+            });
+
+        // ADDRESS
+        fetch(`/practitioner/address/${pid}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = "";
+                data.forEach(a => {
+                    html += `<div class="card"><b>${a.typeaddress}</b><br>${a.fullAddress}</div>`;
+                });
+                document.getElementById("address").innerHTML = html;
+            });
+
+    </script>
+
+</body>
+</html>
