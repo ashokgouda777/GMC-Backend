@@ -23,7 +23,7 @@ namespace GMC.Controllers
         }
 
         // =========================================
-        // ✅ BASIC DETAILS API
+        // ✅ BASIC DETAILS API test is working
         // =========================================
         [HttpGet("practitioner/basic/{pid}")]
         public async Task<IActionResult> GetBasic(string pid)
