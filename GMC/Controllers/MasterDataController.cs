@@ -561,6 +561,9 @@ namespace GMC.Controllers
             });
         }
 
+
+
+        //check 
        /* [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
