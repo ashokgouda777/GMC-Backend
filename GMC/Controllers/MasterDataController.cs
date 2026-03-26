@@ -537,7 +537,7 @@ namespace GMC.Controllers
             }
         }
 
-        [HttpGet("districtmastersget")]
+       /* [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
             try
@@ -1015,26 +1015,11 @@ namespace GMC.Controllers
         [HttpGet("collegesget")]
         public async Task<IActionResult> GetColleges()
         {
-            var colleges = await _context.College
-                .AsNoTracking()
-                .Select(c => new
-                {
-                    collegeId = c.ColId,
-                    collegeName = c.ColName,
-                    universityName = c.UniversityName,
-                    status = c.Status ?? "A"
-                })
-                .ToListAsync();
-
-            return Ok(new
-            {
-                message = "Colleges fetched successfully",
-                count = colleges.Count,
-                data = colleges
-            });
+            var colleges = await _context.College.ToListAsync();
+            return Ok(colleges);
         }
 
-
+        
         [HttpGet("collegegetbyid/{id}")]
         public async Task<IActionResult> GetCollegeById(string id)
         {
@@ -1076,7 +1061,7 @@ namespace GMC.Controllers
             if (existing == null)
             {
                 // ✅ INSERT
-                string colId =  GeneratecollegeId();
+                string colId = "COL" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
 
                 College col = new College
                 {
@@ -1132,9 +1117,7 @@ namespace GMC.Controllers
                     message = "College Updated Successfully",
                     id = existing.ColId
                 });
-
             }
-
         }
 
     }
