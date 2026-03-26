@@ -1,6 +1,7 @@
 ﻿using GMC.Data;
 using GMC.Model;
 using GMC.Model.GMC.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ public class WebsiteConfigController : ControllerBase
     }
 
     // ✅ GET by Id
+    [AllowAnonymous]
     [HttpGet("{UserId}")]
     public async Task<IActionResult> GetById(string UserId)
     {
@@ -54,6 +56,7 @@ public class WebsiteConfigController : ControllerBase
     }
 
     // ✅ POST (Insert or Update)
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Post(SiteSettings model)
     {
