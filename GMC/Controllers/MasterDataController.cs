@@ -218,7 +218,7 @@ namespace GMC.Controllers
                 data = model
             });
         }
-        
+
         [HttpGet("GetLedger")]
         public async Task<IActionResult> GetLedger()
         {
@@ -441,7 +441,7 @@ namespace GMC.Controllers
                 data = model
             });
         }
-        
+
         [HttpGet("countrymastersget")]
         public async Task<IActionResult> GetCountryMaster()
         {
@@ -471,11 +471,11 @@ namespace GMC.Controllers
                 if (string.IsNullOrEmpty(normalizedName))
                     return BadRequest(new { message = "Country name is required." });
 
-                
+
                 var existing = await _context.CountryMaster
                     .FirstOrDefaultAsync(c => c.id == model.id);
 
-                
+
                 // ✅ INSERT
                 // =========================
                 if (existing == null)
@@ -506,7 +506,7 @@ namespace GMC.Controllers
                     });
                 }
 
-                
+
                 // 🔁 UPDATE
                 // =========================
                 var duplicateName = await _context.CountryMaster
@@ -537,7 +537,7 @@ namespace GMC.Controllers
             }
         }
 
-       /* [HttpGet("districtmastersget")]
+        [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
             try
@@ -559,7 +559,7 @@ namespace GMC.Controllers
                             StateId = dc.d.StateId,
                             StateName = s.StateName ?? "Unknown",
                             DistrictName = dc.d.DistrictName ?? "",
-                            
+
                         })
                     .ToListAsync();
 
@@ -606,7 +606,7 @@ namespace GMC.Controllers
                 // =========================
                 if (existing == null)
                 {
-                    
+
                     var duplicate = await _context.DistrictMaster
                         .AnyAsync(d => d.DistrictName.ToLower() == model.DistrictName.ToLower()
                                     && d.StateId == model.StateId);
@@ -665,7 +665,7 @@ namespace GMC.Controllers
                     existing.DistrictName = model.DistrictName;
                     existing.StateId = model.StateId;
                     existing.CountryId = model.CountryId;
-                    
+
                     existing.UpdatedOn = DateTime.Now;
 
                     await _context.SaveChangesAsync();
@@ -752,7 +752,7 @@ namespace GMC.Controllers
                     model.CourseId = string.IsNullOrEmpty(model.CourseId)
                         ? Guid.NewGuid().ToString()
                         : model.CourseId;
-                    
+
 
                     model.CreatedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     model.Status = "A";
@@ -768,15 +768,15 @@ namespace GMC.Controllers
                 }
                 else
                 {
-                    
-                    
+
+
 
                     existing.CourseDescription = model.CourseDescription;
                     existing.CourseShortCode = model.CourseShortCode;
                     existing.CourseNomeclature = model.CourseNomeclature;
                     existing.AdditionalDegree = model.AdditionalDegree;
-                    
-                   
+
+
 
                     existing.UpdatedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
@@ -946,7 +946,7 @@ namespace GMC.Controllers
                 if (string.IsNullOrEmpty(model.UniversityCode))
                     return BadRequest("University Code is required.");
 
-               
+
 
                 // 🔍 Check if exists
                 var existing = await _context.University
@@ -954,7 +954,7 @@ namespace GMC.Controllers
 
                 if (existing == null)
                 {
-                    string uinid =  GenerateUniversityId();
+                    string uinid = GenerateUniversityId();
                     University uin = new University
                     {
                         CouncilId = "1",
@@ -1015,11 +1015,26 @@ namespace GMC.Controllers
         [HttpGet("collegesget")]
         public async Task<IActionResult> GetColleges()
         {
-            var colleges = await _context.College.ToListAsync();
-            return Ok(colleges);
+            var colleges = await _context.College
+                .AsNoTracking()
+                .Select(c => new
+                {
+                    collegeId = c.ColId,
+                    collegeName = c.ColName,
+                    universityName = c.UniversityName,
+                    status = c.Status ?? "A"
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                message = "Colleges fetched successfully",
+                count = colleges.Count,
+                data = colleges
+            });
         }
 
-        
+
         [HttpGet("collegegetbyid/{id}")]
         public async Task<IActionResult> GetCollegeById(string id)
         {
@@ -1061,11 +1076,11 @@ namespace GMC.Controllers
             if (existing == null)
             {
                 // ✅ INSERT
-                string colId = "COL" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string colId = GeneratecollegeId();
 
                 College col = new College
                 {
-                    
+
                     CouncilId = "1",
                     ColId = colId,
                     ColName = model.ColName,
@@ -1117,7 +1132,9 @@ namespace GMC.Controllers
                     message = "College Updated Successfully",
                     id = existing.ColId
                 });
+
             }
+
         }
 
     }
