@@ -231,7 +231,7 @@ public class PaymentController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("CreateOrder")]
-    public async Task<IActionResult> CreateOrder(int amount, string pid, string paymentfor)
+    public async Task<IActionResult> CreateOrder(int amount, string pid, string paymentfor,string? councilid)
     {
         RazorpayClient client = new RazorpayClient(username, password);
 
@@ -253,7 +253,8 @@ public class PaymentController : ControllerBase
             Currency = "INR",
             Order_status = "CREATED",
             LedgerId = paymentfor,
-            CreatedOn = DateTime.Now
+            CreatedOn = DateTime.Now,
+            CouncilName= councilid
         };
 
         _context.RazorPayPaymentAttempt.Add(model);
@@ -269,7 +270,31 @@ public class PaymentController : ControllerBase
 
 
 
+    private string GetNextReferenceNumber(string refNumber)
+    {
+        if (string.IsNullOrEmpty(refNumber))
+            throw new ArgumentException("Reference number cannot be null");
 
+        var parts = refNumber.Split('/');
+
+        if (parts.Length < 4)
+            throw new ArgumentException("Invalid reference number format");
+
+        // Last part = running number
+        var lastPart = parts[^1];
+
+        if (!int.TryParse(lastPart, out int number))
+            throw new ArgumentException("Invalid numeric part in reference number");
+
+        int nextNumber = number + 1;
+
+        // Keep same padding (0001 → 0002)
+        string incremented = nextNumber.ToString(new string('0', lastPart.Length));
+
+        parts[^1] = incremented;
+
+        return string.Join("/", parts);
+    }
 
 
 
@@ -317,120 +342,132 @@ public class PaymentController : ControllerBase
                      .Where(x => x.LedgerID == paymentAttempt.LedgerId)
                      .FirstOrDefaultAsync();
 
+            string genrefno = "";
 
-
-
-            try
+            if (paymentAttempt.LedgerId== "LED27"|| paymentAttempt.LedgerId == "LED35")
             {
-                
-                // Generate Renewal ID
-                string renewalId = await GeneratrenewalidAsync();
-           
-                // ✅ Generate Receipt Number correctly
-                string receiptNumber = await GenerateReceiptNumberAsync();
 
-                var user = await _context.Practitioners
-                  .Where(r => r.PractitionerID == paymentAttempt.PractitionerId)
-                  .Select(r => new
-                  {
-                      Name = r.Name,
-                      RegistrationNo = r.RegistrationNo
-                  })
-                  .FirstOrDefaultAsync();
+                var lastRef = await _context.RenewalHistory
+                                .Where(x => x.RefNo != null)
+                                .OrderByDescending(x => x.CreatedOn)   // ✅ latest record
+                                .Select(x => x.RefNo)
+                                .FirstOrDefaultAsync();
 
-                if (user == null)
+                genrefno = GetNextReferenceNumber(lastRef);
+            }
+          
+
+                try
                 {
-                    return BadRequest("Practitioner not found");
+
+                    // Generate Renewal ID
+                    string renewalId = await GeneratrenewalidAsync();
+
+                    // ✅ Generate Receipt Number correctly
+                    string receiptNumber = await GenerateReceiptNumberAsync();
+
+                    var user = await _context.Practitioners
+                      .Where(r => r.PractitionerID == paymentAttempt.PractitionerId)
+                      .Select(r => new
+                      {
+                          Name = r.Name,
+                          RegistrationNo = r.RegistrationNo
+                      })
+                      .FirstOrDefaultAsync();
+
+                    if (user == null)
+                    {
+                        return BadRequest("Practitioner not found");
+                    }
+
+                    var remarks = "Payment for " + paymentfor.LedgerDescription +
+                                  ", Name: " + user.Name +
+                                  ", RegNo: " + user.RegistrationNo +
+                                  ", Bank: " + "ACC" +
+                                  ", TransactionID: " + paymentId +
+                                  ", Transaction Date: " + DateTime.Now.ToString("dd-MM-yyyy");
+
+
+                    var entity = new RenewalHistory
+                    {
+                        RenewalID = renewalId,
+
+                        CountryId = "1",
+                        StateId = "1",
+                        CouncilId = "1",
+
+                        PractitionerID = paymentAttempt.PractitionerId,
+
+                        Type = "Online",
+
+                        ReceiptNumber = receiptNumber,   // ✅ FIXED
+                        ReceiptDate = DateTime.Now,
+
+                        RenewalDate = DateTime.Now,
+                        TransactionNo = paymentId,
+
+                        Amount = paymentAttempt.Amount.ToString(),
+
+                        PaymentFor = paymentAttempt.LedgerId,
+                        RefNo= genrefno,
+                        Bank = "ACC",
+                        CreatedBy = "WEBHOOK",
+                        CreatedOn = DateTime.Now,
+
+                        Status = "A"
+                    };
+
+                    _context.RenewalHistory.Add(entity);
+
+                    await _context.SaveChangesAsync();
+
+
+                    var entity2 = new FeesReceipt
+                    {
+                        CountryId = "1",
+                        StateId = "1",
+                        CouncilId = "1",
+
+                        LedgerID = paymentAttempt.LedgerId,
+                        AccountNo = "Acc1",
+                        AutoReceiptNo = receiptNumber,
+                        ReceiptNumber = receiptNumber,
+                        ReceiptDate = DateTime.Now,
+                        Amount = decimal.TryParse(paymentAttempt.Amount.ToString(), out var result2) ? result2 : 0,
+                        Type = "R",
+
+                        Remarks = remarks,
+                        CreatedBy = "webhook",
+                        CreatedOn = DateTime.Now
+                    };
+
+                    _context.FeesReceipt.Add(entity2);
+                    await _context.SaveChangesAsync();
+
+
+                    paymentAttempt.Pay_id = paymentId;
+                    paymentAttempt.ReceiptNo = receiptNumber;
+                    paymentAttempt.UpdatedOn = DateTime.Now;
+                    paymentAttempt.UpdatedBy = "Webhook";
+                    paymentAttempt.Order_status = "Captured";
+                    paymentAttempt.UpdatedOn = DateTime.Now;
+
+                    // Save update
+                    _context.RazorPayPaymentAttempt.Update(paymentAttempt);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        message = "Renewal created successfully",
+                        RenewalID = renewalId,
+                        ReceiptNumber = receiptNumber,
+
+                    });
                 }
-
-                var remarks = "Payment for " + paymentfor.LedgerDescription +
-                              ", Name: " + user.Name +
-                              ", RegNo: " + user.RegistrationNo +
-                              ", Bank: " + "ACC" +
-                              ", TransactionID: " + paymentId +
-                              ", Transaction Date: " + DateTime.Now.ToString("dd-MM-yyyy");
-
-
-                var entity = new RenewalHistory
+                catch (Exception ex)
                 {
-                    RenewalID = renewalId,
-
-                    CountryId = "1",
-                    StateId = "1",
-                    CouncilId = "1",
-
-                    PractitionerID = paymentAttempt.PractitionerId,
-
-                    Type = "Online",
-
-                    ReceiptNumber = receiptNumber,   // ✅ FIXED
-                    ReceiptDate = DateTime.Now,
-
-                    RenewalDate = DateTime.Now,
-                    TransactionNo = paymentId,
-
-                    Amount = paymentAttempt.Amount.ToString(),
-
-                    PaymentFor = paymentAttempt.LedgerId,
-               
-                    Bank = "ACC",
-                    CreatedBy = "WEBHOOK",
-                    CreatedOn = DateTime.Now,
-
-                    Status = "A"
-                };
-
-                _context.RenewalHistory.Add(entity);
-
-                await _context.SaveChangesAsync();
-
-
-                var entity2 = new FeesReceipt
-                {
-                    CountryId = "1",
-                    StateId = "1",
-                    CouncilId = "1",
-                    
-                    LedgerID = paymentAttempt.LedgerId,
-                    AccountNo = "Acc1",
-                    AutoReceiptNo = receiptNumber,
-                    ReceiptNumber = receiptNumber,
-                    ReceiptDate =  DateTime.Now,
-                    Amount = decimal.TryParse(paymentAttempt.Amount.ToString(), out var result2) ? result2 : 0,
-                    Type = "R",
-                    
-                    Remarks = remarks,
-                    CreatedBy = "webhook",
-                    CreatedOn = DateTime.Now
-                };
-
-                _context.FeesReceipt.Add(entity2);
-                await _context.SaveChangesAsync();
-
-
-                paymentAttempt.Pay_id = paymentId;
-                paymentAttempt.ReceiptNo = receiptNumber;
-                paymentAttempt.UpdatedOn = DateTime.Now;
-                paymentAttempt.UpdatedBy = "Webhook";
-                paymentAttempt.Order_status = "Captured";
-                paymentAttempt.UpdatedOn = DateTime.Now;
-
-                // Save update
-                _context.RazorPayPaymentAttempt.Update(paymentAttempt);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    message = "Renewal created successfully",
-                    RenewalID = renewalId,
-                    ReceiptNumber = receiptNumber,
-
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+                    return StatusCode(500, ex.Message);
+                }
 
             // TODO: Update payment status in DB
         }

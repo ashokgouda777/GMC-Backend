@@ -130,6 +130,8 @@
 
         public string? Obj_Ren { get; set; }
         public string? CME_Renw { get; set; }
+        public string? Remarks { get; set; }
+        public DateTime? RegCanceldate { get; set; }
     }
 
     [Table("tbl_Role_Master")]
@@ -532,7 +534,7 @@
 [Table("tbl_district_master")]
     public class DistrictMaster
     {
-        [Key]
+       
         [Column(Order = 0)]
         [StringLength(50)]
         public string CountryId { get; set; }
@@ -547,6 +549,7 @@
 
         [Column(Order = 3)]
         [StringLength(50)]
+        [Key]
         public string DistrictId { get; set; }
 
         [StringLength(50)]
@@ -657,6 +660,7 @@
 
         [Column(TypeName = "varchar(50)")]
         public string? LedgerVerified { get; set; }
+        public string? Active { get; set; }
     }
 
 
@@ -1448,5 +1452,80 @@
         public string? Pids { get; set; }
         public string? ProgramId { get; set; }
         public string? ProgramName { get; set; }
+    }
+
+
+    [Table("tbl_Certificate_Master")]
+    public class CertificateMaster
+    {
+        [Key]
+        [Column("Certificate_Id")]
+        public int Certificate_Id { get; set; }
+
+        public string? CouncilId { get; set; }
+        public string? StateId { get; set; }
+        public string? CountryId { get; set; }
+
+        public string? Certificate_Name { get; set; }
+        public string? Certificate_Type { get; set; }
+
+        public string? CreatedBy { get; set; }
+        public DateTime? CreatedOn { get; set; }
+
+        public string? UpdatedBy { get; set; }
+        public DateTime? UpdatedOn { get; set; }
+    }
+
+
+    [Table("tbl_Practitioner_Document_Details")]
+    public class PractitionerDocumentDetails
+    {
+        [Key] // ⚠️ Required if no PK in DB (temporary fix)
+        public string? DocumentId { get; set; }
+
+        public string? CountryId { get; set; }
+        public string? StateId { get; set; }
+        public string? CouncilId { get; set; }
+        public string? PractitionerID { get; set; }
+        public string? DocumentType { get; set; }
+        public string? DocumentSize { get; set; }
+        public string? DocumentName { get; set; }
+        public string? DocumentPath { get; set; }
+        public string? CreatedOn { get; set; }
+        public string? CreatedBy { get; set; }
+        public string? UpdatedBy { get; set; }
+        public string? UpdatedOn { get; set; }
+        public string? FileExtn { get; set; }
+        public string? PhotoYN { get; set; }
+        public string? BCodeYN { get; set; }
+        public string? Sync_Yn { get; set; }
+    }
+
+    [Table("tbl_Regtype_doc_list_link")]
+    public class RegtypeDocListLink
+    {
+        [Key]
+        [Required]
+        public string Doc_types { get; set; } = string.Empty;
+
+        public string? CountryId { get; set; }
+
+        public string? StateId { get; set; }
+
+        public string? CouncilId { get; set; }
+
+        public string? Ledgerid { get; set; }
+
+        public string? Type_Id { get; set; }
+
+        public string? Doc_Details { get; set; }
+
+        public string? CreatedBy { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+
+        public string? UpdatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
     }
 }

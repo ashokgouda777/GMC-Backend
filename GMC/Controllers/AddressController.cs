@@ -121,16 +121,26 @@ namespace GMC.Controllers
                 return BadRequest("AddressType must be 'R' or 'P'");
 
             var existingAddress = await (
-     from a in _context.Address
-     join s in _context.StateMaster
-         on a.State equals s.StateId
-     join c in _context.CountryMaster
-         on a.Country equals c.CountryId
-     join d in _context.DistrictMaster
-         on a.District equals d.DistrictId
-     where a.ClientID == clientId
-           && a.AddressType == addressType
-     select new
+       from a in _context.Address
+
+           // State LEFT JOIN
+       join s in _context.StateMaster
+           on a.State equals s.StateId into sGroup
+       from s in sGroup.DefaultIfEmpty()
+
+           // Country LEFT JOIN
+       join c in _context.CountryMaster
+           on a.Country equals c.CountryId into cGroup
+       from c in cGroup.DefaultIfEmpty()
+
+           // District LEFT JOIN
+       join d in _context.DistrictMaster
+           on a.District equals d.DistrictId into dGroup
+       from d in dGroup.DefaultIfEmpty()
+
+       where a.ClientID == clientId
+             && a.AddressType == addressType
+       select new
      {
          a.ClientID,
          a.AddressType,

@@ -48,8 +48,10 @@ namespace GMC.Controllers
                     CertificateNo = model.CertificateNo,
                     CertificateDate = model.CertificateDate,
                     ADSerialno = model.ADSerialno,
+                    IsIssued="yes",
                     CreatedBy = model.CreatedBy,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = DateTime.Now,
+                    Active="A"
                 };
 
                 _context.EducationInfo.Add(entity);
@@ -121,14 +123,21 @@ namespace GMC.Controllers
         [HttpGet("get/{practitionerId}")]
         public async Task<IActionResult> GetEducationInfo(string practitionerId)
         {
-            var data = await (
-                from edu in _context.EducationInfo
+                    var data = await (
+             from edu in _context.EducationInfo
 
-              join c in _context.College on edu.CollegeID equals c.ColId
-              join u in _context.University on edu.UniversityId equals u.UniversityId
-              
+                 // College LEFT JOIN
+             join c in _context.College
+                 on edu.CollegeID equals c.ColId into cGroup
+             from c in cGroup.DefaultIfEmpty()
 
-                where edu.PractitionerID == practitionerId
+                 // University LEFT JOIN
+             join u in _context.University
+                 on edu.UniversityId equals u.UniversityId into uGroup
+             from u in uGroup.DefaultIfEmpty()
+
+
+             where edu.PractitionerID == practitionerId && edu.Active=="A"
 
                 select new
                 {
@@ -137,7 +146,7 @@ namespace GMC.Controllers
                     edu.EducationName,
                     edu.YearOfPassing,
                     edu.CollegeID,
-                    edu.UniversityId,
+
                     c.ColName,
                     u.UniversityName,
                     edu.Subject,
@@ -158,6 +167,39 @@ namespace GMC.Controllers
                 return NotFound("No records found");
 
             return Ok(data);
+        }
+
+
+
+
+        [HttpPost("deleteeducation")]
+        public async Task<IActionResult> deleteeducation(string educationid,string UpdatedBy)
+        {
+            if (string.IsNullOrEmpty(educationid))
+                return BadRequest("Invalid data");
+
+           
+
+            // UPDATE
+            var existing = await _context.EducationInfo
+                .FirstOrDefaultAsync(x => x.EducationID == educationid);
+
+            if (existing == null)
+                return NotFound("Record not found");
+
+            // Update entity from DTO
+
+            existing.Active ="N";
+            existing.UpdatedBy = UpdatedBy;
+            existing.UpdatedOn = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Updated successfully",
+                EducationID = existing.EducationID
+            });
         }
 
 

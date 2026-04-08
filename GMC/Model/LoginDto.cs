@@ -211,4 +211,92 @@ namespace GMC.Model
         public string Thumb { get; set; }
         public string Barcode { get; set; }
     }
+
+
+
+    public class CollegeDto
+    {
+
+        public string? ColId { get; set; }
+
+        public string? ColName { get; set; }
+
+        public string? ColAddress { get; set; }
+
+        public string? District { get; set; }
+
+        public string? Type { get; set; }
+
+        public string? PrincipalName { get; set; }
+
+        public string? TelNumber { get; set; }
+
+        public string? UniversityName { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? Status { get; set; }
+
+        public string? UserId { get; set; }
+
+        public string? Password { get; set; }
+
+        public string? FirsttimeLogin { get; set; }
+
+        public string? Photo { get; set; }
+
+        public int? Usercount { get; set; }
+
+        public string? Country { get; set; }
+
+        public string? State { get; set; }
+
+        public string? CollegeCode { get; set; }
+
+    }
+
+
+    public class MdsSubjectMasterDTO
+    {
+
+        public string Sub_code { get; set; }
+
+        public string? Sub_name { get; set; }
+
+      
+        public string? CreatedBy { get; set; }
+
+
+        public string? UpdatedBy { get; set; }
+
+      
+        public string? ShortCode { get; set; }
+
+        public string? CourseId { get; set; }
+
+        public string? ActiveStatus { get; set; }
+    }
+
+    public class CouncilDto
+    {
+        public string? CouncilId { get; set; }
+        public string? CouncilName { get; set; }
+
+        public string CountryId { get; set; }
+        public string StateId { get; set; }
+
+        public string? City { get; set; }
+        public string? EmailId { get; set; }
+        public string? Phoneno { get; set; }
+        public string? Website { get; set; }
+
+        public string? Address { get; set; }
+        public string? Address2 { get; set; }
+        public string? ZipCode { get; set; }
+
+        public string? ShortCode { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public DateTime? UpdatedOn { get; set; }
+    }
 }

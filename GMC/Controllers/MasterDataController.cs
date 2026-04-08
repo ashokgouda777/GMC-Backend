@@ -3,6 +3,7 @@ using GMC.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 
 namespace GMC.Controllers
 {
@@ -88,6 +89,7 @@ namespace GMC.Controllers
         public async Task<IActionResult> nationalitymaster()
         {
             var nation = await _context.NationalityMaster
+                 .OrderBy(r => r.Nationality)
                 .Select(r => new
                 {
                     NationalityId = r.NationalityId,
@@ -104,6 +106,7 @@ namespace GMC.Controllers
         public async Task<IActionResult> countrymaster()
         {
             var nation = await _context.CountryMaster
+                .OrderBy(r => r.CountryName)
                 .Select(r => new
                 {
                     CountryId = r.CountryId,
@@ -123,6 +126,7 @@ namespace GMC.Controllers
 
             var states = await _context.StateMaster
                 .Where(r => r.CountryId == countryId)
+                .OrderBy(r => r.StateName)
                 .Select(r => new
                 {
                     StateId = r.StateId,
@@ -139,6 +143,7 @@ namespace GMC.Controllers
         {
             var nation = await _context.DistrictMaster
                 .Where(r => r.StateId == stateId)
+                .OrderBy(r => r.DistrictName)
                 .Select(r => new
                 {
                     DistrictId = r.DistrictId,
@@ -153,7 +158,7 @@ namespace GMC.Controllers
         public async Task<IActionResult> coursemaster()
         {
             var nation = await _context.CourseMaster
-
+                .OrderBy(r => r.CourseShortCode)
                 .Select(r => new
                 {
                     CourseId = r.CourseId,
@@ -167,7 +172,7 @@ namespace GMC.Controllers
         public async Task<IActionResult> uiniversitys()
         {
             var nation = await _context.University
-
+                .OrderBy(r => r.UniversityName)
                 .Select(r => new
                 {
                     UniversityId = r.UniversityId,
@@ -183,6 +188,7 @@ namespace GMC.Controllers
         {
             var colleges = await _context.College
                 .Where(r => r.UniversityName == universityId)
+                .OrderBy(r => r.UniversityName)
                 .Select(r => new
                 {
                     colid = r.ColId,
@@ -229,6 +235,7 @@ namespace GMC.Controllers
                 join fi in _context.FeesItems
                     on Convert.ToInt32(lf.FeeItemID) equals fi.FeeItemId
                 where gl.LedgerStatus == "A"
+                orderby gl.LedgerDescription
                 select new
                 {
                     LedgerID = gl.LedgerID,
@@ -283,7 +290,7 @@ namespace GMC.Controllers
 
                 .Select(r => new
                 {
-                    account = r.GroupID,
+                    account = r.GroupName,
 
                 })
                 .ToListAsync();
@@ -307,7 +314,7 @@ namespace GMC.Controllers
                             CountryId = s.CountryId,
                             CountryName = c.CountryName ?? "Unknown",
                             StateName = s.StateName ?? "",
-                            Active = s.Active ?? "No"
+                            Active = s.Active 
                         })
                     .ToListAsync();
 
@@ -376,20 +383,12 @@ namespace GMC.Controllers
                     });
                 }
 
-                // =========================
-                // 🔁 UPDATE
-                // =========================
-                var duplicateName = await _context.StateMaster
-                    .AnyAsync(s => s.StateId != model.StateId &&
-                                   s.StateName.ToLower() == model.StateName.ToLower() &&
-                                   s.CountryId == model.CountryId);
+               
 
-                if (duplicateName)
-                    return BadRequest(new { message = "State name already exists for this country." });
 
                 existing.StateName = model.StateName;
                 existing.CountryId = model.CountryId;
-                existing.Active = model.Active ?? existing.Active;
+                existing.Active = model.Active;
                 existing.UpdatedOn = DateTime.Now;
 
                 await _context.SaveChangesAsync();
@@ -473,7 +472,7 @@ namespace GMC.Controllers
 
 
                 var existing = await _context.CountryMaster
-                    .FirstOrDefaultAsync(c => c.id == model.id);
+                    .FirstOrDefaultAsync(c => c.CountryId == model.CountryId);
 
 
                 // ✅ INSERT
@@ -509,15 +508,10 @@ namespace GMC.Controllers
 
                 // 🔁 UPDATE
                 // =========================
-                var duplicateName = await _context.CountryMaster
-                    .AnyAsync(c => c.id != model.id &&
-                                   c.CountryName.ToLower() == normalizedName.ToLower());
-
-                if (duplicateName)
-                    return BadRequest(new { message = "Country name already exists." });
+             
 
                 existing.CountryName = model.CountryName;
-                existing.Active = model.Active ?? existing.Active;
+                existing.Active = model.Active;
 
                 await _context.SaveChangesAsync();
 
@@ -536,87 +530,88 @@ namespace GMC.Controllers
                 });
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("districtmastersget")]
         public async Task<IActionResult> GetDistrictMaster()
         {
             try
             {
-                var districts = await _context.DistrictMaster
-                    .AsNoTracking()
-                    .Join(_context.CountryMaster,
-                        d => d.CountryId,
-                        c => c.CountryId,
-                        (d, c) => new { d, c })
-                    .Join(_context.StateMaster,
-                        dc => dc.d.StateId,
-                        s => s.StateId,
-                        (dc, s) => new
-                        {
-                            DistrictId = dc.d.DistrictId,
-                            CountryId = dc.d.CountryId,
-                            CountryName = dc.c.CountryName ?? "Unknown",
-                            StateId = dc.d.StateId,
-                            StateName = s.StateName ?? "Unknown",
-                            DistrictName = dc.d.DistrictName ?? "",
+                var districts = await (
+                    from d in _context.DistrictMaster.AsNoTracking()
 
-                        })
-                    .ToListAsync();
+                    join c in _context.CountryMaster
+                        on d.CountryId equals c.CountryId into countryGroup
+                    from c in countryGroup.DefaultIfEmpty()
+
+                    join s in _context.StateMaster
+                        on d.StateId equals s.StateId into stateGroup
+                    from s in stateGroup.DefaultIfEmpty()
+
+                    select new
+                    {
+                        DistrictId = d.DistrictId,
+                        DistrictName = d.DistrictName,
+
+                        CountryId = d.CountryId,
+                        CountryName = c != null ? c.CountryName : "NA",
+
+                        StateId = d.StateId,
+                        StateName = s != null ? s.StateName : "NA",
+
+                        Status = d.Status,
+                        CreatedOn = d.CreatedOn,
+                        UpdatedOn = d.UpdatedOn
+                    }
+                ).ToListAsync();
 
                 return Ok(districts);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new
+                {
+                    message = "Error fetching district data",
+                    error = ex.Message
+                });
             }
         }
-
         [AllowAnonymous]
-        [HttpPost("districtmaster-save")]
-        public async Task<IActionResult> CreateOrUpdateDistrict([FromBody] DistrictMaster model)
+        [HttpPost("districtmastersave")]
+        public async Task<IActionResult> districtmastersave(
+            string countryid,
+            string stateid,
+            string districname,
+            string? DistrictId,
+            string? active)
         {
             try
             {
-                if (model == null)
-                {
-                    return BadRequest(new { message = "Invalid district model" });
-                }
-
-                if (string.IsNullOrEmpty(model.DistrictName))
-                {
+                // ✅ Validation
+                if (string.IsNullOrWhiteSpace(districname))
                     return BadRequest(new { message = "District name is required." });
-                }
 
-                if (string.IsNullOrEmpty(model.StateId))
-                {
+                if (string.IsNullOrWhiteSpace(stateid))
                     return BadRequest(new { message = "State is required." });
-                }
 
-                if (string.IsNullOrEmpty(model.CountryId))
-                {
+                if (string.IsNullOrWhiteSpace(countryid))
                     return BadRequest(new { message = "Country is required." });
-                }
-
-                // 🔍 Check if exists
-                var existing = await _context.DistrictMaster
-                    .FirstOrDefaultAsync(d => d.DistrictId == model.DistrictId);
 
                 // =========================
                 // ✅ INSERT
                 // =========================
-                if (existing == null)
+                if (string.IsNullOrEmpty(DistrictId))
                 {
-
+                    // 🔁 Duplicate check
                     var duplicate = await _context.DistrictMaster
-                        .AnyAsync(d => d.DistrictName.ToLower() == model.DistrictName.ToLower()
-                                    && d.StateId == model.StateId);
+                        .AnyAsync(d => d.DistrictName.ToLower() == districname.ToLower()
+                                    && d.StateId == stateid);
 
                     if (duplicate)
                     {
                         return BadRequest(new { message = "District already exists for this state." });
                     }
 
-                    // 🔢 Generate DistrictId
+                    // 🔢 Generate ID safely
                     var ids = await _context.DistrictMaster
                         .Select(d => d.DistrictId)
                         .ToListAsync();
@@ -632,40 +627,61 @@ namespace GMC.Controllers
                         }
                     }
 
-                    model.DistrictId = (maxId + 1).ToString();
-                    model.CreatedOn = DateTime.Now;
-                    model.Status = "A";
-                    model.CreatedBy = "Admin";
+                    var newId = (maxId + 1).ToString(); // ✅ FIXED
 
-                    _context.DistrictMaster.Add(model);
+                    var dis = new DistrictMaster
+                    {
+                        CountryId = countryid,
+                        StateId = stateid,
+                        DistrictId = newId,
+                        DistrictName = districname,
+                        CreatedOn = DateTime.Now,
+                        CreatedBy = "admin",
+                        Status = "A",
+                        CouncilId = "1"
+                    };
+
+                    _context.DistrictMaster.Add(dis);
                     await _context.SaveChangesAsync();
 
                     return Ok(new
                     {
                         message = "District created successfully",
-                        data = model
+                        data = dis
                     });
                 }
+
+                // =========================
+                // ✅ UPDATE
+                // =========================
                 else
                 {
-                    // =========================
-                    // 🔁 UPDATE
-                    // =========================
+                    // 🔍 Get exact record
+                    var existing = await _context.DistrictMaster
+                        .FirstOrDefaultAsync(d => d.DistrictId == DistrictId);
 
-                    var duplicateName = await _context.DistrictMaster
-                        .AnyAsync(d => d.DistrictId != model.DistrictId &&
-                                       d.DistrictName.ToLower() == model.DistrictName.ToLower() &&
-                                       d.StateId == model.StateId);
-
-                    if (duplicateName)
+                    if (existing == null)
                     {
-                        return BadRequest(new { message = "District name already exists for this state." });
+                        return NotFound(new { message = "District not found." });
                     }
 
-                    existing.DistrictName = model.DistrictName;
-                    existing.StateId = model.StateId;
-                    existing.CountryId = model.CountryId;
+                    // 🔁 Duplicate check (exclude current record)
+                    var duplicate = await _context.DistrictMaster
+                        .AnyAsync(d => d.DistrictName.ToLower() == districname.ToLower()
+                                    && d.StateId == stateid
+                                    && d.DistrictId != DistrictId);
 
+                    if (duplicate)
+                    {
+                        return BadRequest(new { message = "District already exists for this state." });
+                    }
+
+                    // ✏️ Update only this record
+                    existing.DistrictId = DistrictId;
+                    existing.DistrictName = districname;
+                    existing.StateId = stateid;
+                    existing.CountryId = countryid;
+                    existing.Status = active ?? existing.Status;
                     existing.UpdatedOn = DateTime.Now;
 
                     await _context.SaveChangesAsync();
@@ -723,7 +739,7 @@ namespace GMC.Controllers
                 });
             }
         }
-        [AllowAnonymous]
+        
         [HttpPost("coursemaster-save")]
         public async Task<IActionResult> CreateOrUpdateCourse([FromBody] CourseMaster model)
         {
@@ -769,13 +785,11 @@ namespace GMC.Controllers
                 else
                 {
 
-
-
                     existing.CourseDescription = model.CourseDescription;
                     existing.CourseShortCode = model.CourseShortCode;
                     existing.CourseNomeclature = model.CourseNomeclature;
                     existing.AdditionalDegree = model.AdditionalDegree;
-
+                    existing.Status = model.Status;
 
 
                     existing.UpdatedOn = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -801,7 +815,7 @@ namespace GMC.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("mdssubjectmastersget")]
         public async Task<IActionResult> GetMdsSubjectMaster()
         {
@@ -817,87 +831,100 @@ namespace GMC.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
-        [HttpPost("mdssubjectmasterspost")]
-        public async Task<IActionResult> CreateMdsSubjectMaster([FromBody] MdsSubjectMaster model)
+        [AllowAnonymous]
+        [HttpPost("mdssubjectmaster-save")]
+        public async Task<IActionResult> CreateOrUpdateMdsSubjectMaster([FromBody] MdsSubjectMasterDTO model)
         {
             try
             {
-                if (model == null) return BadRequest(new { message = "Invalid subject model" });
+                if (model == null)
+                    return BadRequest(new { message = "Invalid subject model" });
 
                 if (string.IsNullOrEmpty(model.Sub_name))
-                {
                     return BadRequest(new { message = "Subject name is required." });
-                }
 
-                if (string.IsNullOrEmpty(model.Sub_code))
+                // 🔍 Check existing using Sub_code
+                var existing = await _context.MdsSubjectMaster
+                    .FirstOrDefaultAsync(s => s.Sub_code == model.Sub_code);
+
+                // =========================
+                // ✅ INSERT
+                // =========================
+                if (existing == null)
                 {
-                    model.Sub_code = Guid.NewGuid().ToString().Substring(0, 8);
+                  string gensubcode=await Generatesubjectcode();
+
+                    var subject = new MdsSubjectMaster
+                    {
+                        Sub_code = gensubcode,
+                        Sub_name = model.Sub_name,
+                        ShortCode = model.ShortCode,
+                        CourseId = model.CourseId,
+                        ActiveStatus = "A",
+                        CreatedBy =  "Admin",
+                        CreatedOn = DateTime.Now
+                    };
+
+                    _context.MdsSubjectMaster.Add(subject);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        message = "Subject created successfully",
+                        id = subject.Sub_code
+                    });
                 }
+                else
+                {
+                    // =========================
+                    // 🔁 UPDATE
+                    // =========================
+                    existing.Sub_name = model.Sub_name;
+                    existing.ShortCode = model.ShortCode;
+                    existing.CourseId = model.CourseId;
+                    existing.ActiveStatus = model.ActiveStatus;
 
-                model.CreatedOn = DateTime.Now;
-                model.ActiveStatus = string.IsNullOrEmpty(model.ActiveStatus) ? "Active" : model.ActiveStatus;
+                    existing.UpdatedBy = model.UpdatedBy ?? "Admin";
+                    existing.UpdatedOn = DateTime.Now;
 
+                    await _context.SaveChangesAsync();
 
-
-                _context.MdsSubjectMaster.Add(model);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { message = "Subject saved successfully", data = model });
+                    return Ok(new
+                    {
+                        message = "Subject updated successfully",
+                        id = existing.Sub_code
+                    });
+                }
             }
             catch (Exception ex)
             {
                 var innerMsg = ex.InnerException != null ? $"; Inner: {ex.InnerException.Message}" : "";
-                return StatusCode(500, new { message = "Backend Error: " + ex.Message + innerMsg });
+
+                return StatusCode(500, new
+                {
+                    message = "Backend Error: " + ex.Message + innerMsg
+                });
             }
         }
 
-        [HttpPut("mdssubjectmastersupdate/{id}")]
-        public async Task<IActionResult> UpdateMdsSubjectMaster(string id, [FromBody] MdsSubjectMaster model)
+
+        private async Task<string> Generatesubjectcode()
         {
-            try
+            string id;
+            var rnd = new Random();
+
+            do
             {
-                var subject = await _context.MdsSubjectMaster.FirstOrDefaultAsync(s => s.Sub_code == id);
-                if (subject == null) return NotFound("Subject not found");
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                int random = rnd.Next(100, 999);
+                id = $"P{timestamp}{random}";
 
-                subject.Sub_name = model.Sub_name;
-                subject.ShortCode = model.ShortCode;
-                subject.CourseId = model.CourseId;
-                subject.ActiveStatus = model.ActiveStatus;
+            } while (await _context.Users.AnyAsync(x => x.userId == id));
 
-
-
-
-                subject.UpdatedBy = model.UpdatedBy;
-                subject.UpdatedOn = DateTime.Now;
-
-                await _context.SaveChangesAsync();
-                return Ok(new { message = "Subject updated successfully", data = subject });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return id;
         }
 
-        [HttpDelete("mdssubjectmastersdelete/{id}")]
-        public async Task<IActionResult> DeleteMdsSubjectMaster(string id)
-        {
-            try
-            {
-                var subject = await _context.MdsSubjectMaster.FirstOrDefaultAsync(s => s.Sub_code == id);
-                if (subject == null) return NotFound("Subject not found");
 
-                _context.MdsSubjectMaster.Remove(subject);
-                await _context.SaveChangesAsync();
-                return Ok(new { message = "Subject deleted successfully" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-
-        }
         [HttpGet("universityget/{id}")]
         public async Task<ActionResult<University>> GetUniversity(string id)
         {
@@ -910,7 +937,7 @@ namespace GMC.Controllers
 
             return university;
         }
-        [AllowAnonymous]
+        
         [HttpGet("universitymastersget")]
         public async Task<IActionResult> GetUniversities()
         {
@@ -934,7 +961,6 @@ namespace GMC.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        [AllowAnonymous]
         [HttpPost("universitypost")]
         public async Task<IActionResult> PostUniversity([FromBody] University model)
         {
@@ -1017,12 +1043,29 @@ namespace GMC.Controllers
         {
             var colleges = await _context.College
                 .AsNoTracking()
-                .Select(c => new
+                 .OrderByDescending(c => c.CreatedOn)
+                .Select(c => new CollegeDto
                 {
-                    collegeId = c.ColId,
-                    collegeName = c.ColName,
-                    universityName = c.UniversityName,
-                    status = c.Status ?? "A"
+                   
+                    ColId = c.ColId,
+                    ColName = c.ColName,
+                    ColAddress = c.ColAddress,
+                    District = c.District,
+                    Type = c.Type,
+                    PrincipalName = c.PrincipalName,
+                    TelNumber = c.TelNumber,
+                    UniversityName = c.UniversityName,
+                    Email = c.Email,
+                    Status = c.Status,
+                    UserId = c.UserId,
+                    Password = c.Password,
+                    FirsttimeLogin = c.FirsttimeLogin,
+                    Photo = c.Photo,
+                    Usercount = c.Usercount,
+                    Country = c.Country,
+                    State = c.State,
+                    CollegeCode = c.CollegeCode,
+                   
                 })
                 .ToListAsync();
 
@@ -1055,7 +1098,7 @@ namespace GMC.Controllers
         }
         [AllowAnonymous]
         [HttpPost("college-save")]
-        public async Task<IActionResult> CreateOrUpdateCollege([FromBody] College model)
+        public async Task<IActionResult> CreateOrUpdateCollege([FromBody] CollegeDto model)
         {
             if (model == null)
                 return BadRequest(new { message = "Invalid Data" });
@@ -1094,7 +1137,7 @@ namespace GMC.Controllers
                     Country = model.Country,
                     State = model.State,
                     CollegeCode = model.CollegeCode,
-                    Status = "A",
+                    Status = "Y",
                     CreatedBy = "Admin",
                     CreatedOn = DateTime.Now
                 };
@@ -1119,12 +1162,12 @@ namespace GMC.Controllers
                 existing.TelNumber = model.TelNumber;
                 existing.UniversityName = model.UniversityName;
                 existing.Email = model.Email;
-                existing.UpdatedBy = model.UpdatedBy;
+                existing.UpdatedBy = "Admin";
                 existing.UpdatedOn = DateTime.Now;
                 existing.Country = model.Country;
                 existing.State = model.State;
                 existing.CollegeCode = model.CollegeCode;
-
+                existing.Status = model.Status;
                 await _context.SaveChangesAsync();
 
                 return Ok(new
@@ -1134,8 +1177,281 @@ namespace GMC.Controllers
                 });
 
             }
+           
+        }
+        
+        [HttpPost("nationality-save")]
+        public async Task<IActionResult> CreateOrUpdateNationality([FromBody] NationalityMaster model)
+        {
+            try
+            {
+                if (model == null)
+                    return BadRequest(new { message = "Invalid nationality model" });
+
+                if (string.IsNullOrEmpty(model.Nationality))
+                    return BadRequest(new { message = "Nationality is required." });
+
+                // 🔍 Check existing
+                var existing = await _context.NationalityMaster
+                    .FirstOrDefaultAsync(x => x.NationalityId == model.NationalityId);
+
+                // =========================
+                // ✅ INSERT
+                // =========================
+                if (existing == null)
+                {
+                    string natId = GenerateNationalityId(); // ✅ proper ID generation
+
+                    NationalityMaster nat = new NationalityMaster
+                    {
+                        NationalityId = natId,
+                        Nationality = model.Nationality,
+                        CountryId = "1",
+                        StateId = "1",
+                        CouncilId = "1",
+                        Status = "A",
+                        CreatedBy = "Admin",
+                        CreatedOn = DateTime.Now
+                    };
+
+                    _context.NationalityMaster.Add(nat);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        message = "Nationality Created Successfully",
+                        id = nat.NationalityId
+                    });
+                }
+                else
+                {
+                    // =========================
+                    // 🔁 UPDATE
+                    // =========================
+                    existing.Nationality = model.Nationality;
+                    existing.CountryId = model.CountryId ?? existing.CountryId;
+                    existing.StateId = model.StateId ?? existing.StateId;
+                    existing.CouncilId = model.CouncilId ?? existing.CouncilId;
+                    existing.Status = model.Status;
+                    existing.UpdatedBy = model.UpdatedBy ?? "Admin";
+                    existing.UpdatedOn = DateTime.Now;
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        message = "Nationality Updated Successfully",
+                        id = existing.NationalityId
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                var innerMsg = ex.InnerException != null ? $"; Inner: {ex.InnerException.Message}" : "";
+
+                return StatusCode(500, new
+                {
+                    message = "Backend Error: " + ex.Message + innerMsg
+                });
+            }
+        }
+        private string GenerateNationalityId()
+        {
+            var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+            var random = Guid.NewGuid().ToString("N").Substring(0, 4).ToUpper();
+
+            return $"NAT{timestamp}{random}";
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("nationalitymastersget")]
+        public async Task<IActionResult> GetNationalityMaster()
+        {
+            try
+            {
+                var data = await _context.NationalityMaster
+                    .AsNoTracking()
+                    .Select(n => new
+                    {
+                        nationalityId = n.NationalityId,
+                        Nationality = n.Nationality,
+                        status = n.Status ?? "A"
+                    })
+                    .ToListAsync();
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error fetching nationality data",
+                    error = ex.Message
+                });
+            }
 
         }
 
+
+        [HttpPost("save-council")]
+        public async Task<IActionResult> SaveCouncil([FromBody] CouncilDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = await _context.JCouncilMaster
+                .FirstOrDefaultAsync(x => x.CouncilId == dto.CouncilId);
+
+            var nameExists = await _context.JCouncilMaster
+           .AnyAsync(x =>
+               x.CouncilName.ToLower() == dto.CouncilName.ToLower()
+               && x.CouncilId != dto.CouncilId);
+
+            if (nameExists)
+            {
+                return BadRequest(new
+                {
+                    message = "Council name already exists"
+                });
+            }
+
+            if (existing != null)
+            {
+                // UPDATE
+                existing.CountryId = dto.CountryId;
+                existing.StateId = dto.StateId;
+                existing.CouncilName = dto.CouncilName;
+                existing.UpdatedBy = "Admin";
+                existing.UpdatedOn = DateTime.Now;
+                existing.Address = dto.Address;
+                existing.EmailId = dto.EmailId;
+                existing.Phoneno = dto.Phoneno;
+                existing.Website = dto.Website;
+          
+              
+                existing.ShortCode = dto.ShortCode;
+                existing.City = dto.City;
+                existing.Address2 = dto.Address2;
+                existing.ZipCode = dto.ZipCode;
+            }
+            else
+            {
+
+
+                // ✅ GENERATE CouncilId
+                var lastCouncil = await _context.JCouncilMaster
+                    .OrderByDescending(x => x.CouncilId)
+                    .Select(x => x.CouncilId)
+                    .FirstOrDefaultAsync();
+
+                int nextNumber = 1;
+
+                if (!string.IsNullOrEmpty(lastCouncil))
+                {
+                    // Example: C001 → 001 → 1
+                    var numberPart = new string(lastCouncil
+                        .Where(char.IsDigit)
+                        .ToArray());
+
+                    if (int.TryParse(numberPart, out int lastNumber))
+                    {
+                        nextNumber = lastNumber + 1;
+                    }
+                }
+
+                string newCouncilId = $"C{nextNumber.ToString("D3")}"; // C001, C002...
+
+                // INSERT
+                var model = new JCouncilMaster
+                {
+                    CouncilId = newCouncilId,
+                    CountryId = dto.CountryId,
+                    StateId = dto.StateId,
+                    CouncilName = dto.CouncilName,
+                    CreatedBy = "Admin",
+                    CreatedOn = DateTime.Now,
+                    Address = dto.Address,
+                    EmailId = dto.EmailId,
+                    Phoneno = dto.Phoneno,
+                    Website = dto.Website,
+                    ShortCode = dto.ShortCode,
+                    City = dto.City,
+                    Address2 = dto.Address2,
+                    ZipCode = dto.ZipCode
+                };
+
+                await _context.JCouncilMaster.AddAsync(model);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Success");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("get-all-councils")]
+        public async Task<IActionResult> GetAllCouncils()
+        {
+            var data = await _context.JCouncilMaster
+                .AsNoTracking()
+                .OrderByDescending(x => x.CreatedOn)
+                .Select(x => new CouncilDto
+                {
+                    CouncilId = x.CouncilId,
+                    CouncilName = x.CouncilName,
+                    CountryId = x.CountryId,
+                    StateId = x.StateId,
+                    City = x.City,
+                    EmailId = x.EmailId,
+                    Phoneno = x.Phoneno,
+                    Website = x.Website,
+                    Address = x.Address,
+                    Address2 = x.Address2,
+                    ZipCode = x.ZipCode,
+                    ShortCode = x.ShortCode,
+                    CreatedOn = x.CreatedOn,
+                    UpdatedOn = x.UpdatedOn
+                })
+                .ToListAsync();
+
+            return Ok(data);
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("GetAllCertificates")]
+        public async Task<IActionResult> GetAllCertificates()
+        {
+            var certificates = await _context.CertificateMasters
+                .OrderBy(c=>c.Certificate_Name)
+                .Select(c => new
+                {
+                    Id = c.Certificate_Id,
+                    Name = c.Certificate_Name,
+                    Typeid=c.Certificate_Type
+                })
+                .ToListAsync();
+
+            return Ok(certificates);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Getdocumentsforservices")]
+        public async Task<IActionResult> Getdocuments(string certificatetype)
+        {
+            var certificates = await _context.RegtypeDocListLink
+                .OrderBy(c => c.Doc_Details)
+                .Where(c=>c.Type_Id== certificatetype)
+                .Select(c => new
+                {
+                    Id = c.Doc_types,
+                    docdetailes = c.Doc_Details,
+                  
+                })
+                .ToListAsync();
+
+            return Ok(certificates);
+        }
     }
 }

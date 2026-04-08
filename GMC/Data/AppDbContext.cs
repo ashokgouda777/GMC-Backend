@@ -55,5 +55,9 @@ namespace GMC.Data
         public DbSet<MdsSubjectMaster> MdsSubjectMaster { get; set; }
 
         public DbSet<RazorPayPaymentAttempt> RazorPayPaymentAttempt { get; set; }
+        public DbSet<CertificateMaster> CertificateMasters { get; set; }
+
+        public DbSet<PractitionerDocumentDetails> PractitionerDocumentDetails { get; set; }
+        public DbSet<RegtypeDocListLink> RegtypeDocListLink { get; set; }
     }
 }
