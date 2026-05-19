@@ -3,9 +3,7 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet restore "./GMC/GMC.csproj"
-
-WORKDIR "/src/GMC"
+RUN dotnet restore "GMC.csproj"
 
 RUN dotnet publish "GMC.csproj" -c Release -o /app/publish
 
