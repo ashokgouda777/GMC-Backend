@@ -3,7 +3,7 @@ using GMC.Model;
 using GMC.Model.GMC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using SkiaSharp;
 using ZXing;
