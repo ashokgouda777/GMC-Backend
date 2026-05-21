@@ -64,7 +64,7 @@ namespace GMC.Controllers
             {
                 string regno;
 
-                var regForParam = new SqlParameter("@RegistrationFor", dto.RegistrationFor);
+                var regForParam = new NpgsqlParameter("@RegistrationFor", dto.RegistrationFor);
 
                 var nextNo = await _context.Database
                     .SqlQueryRaw<int>(@"
@@ -608,7 +608,7 @@ namespace GMC.Controllers
             string regno;
             string prcarchive = practitioner.RegistrationNo;
 
-            var regForParam = new SqlParameter("@RegistrationFor", "1");
+            var regForParam = new NpgsqlParameter("@RegistrationFor", "1");
 
             var nextNo = await _context.Database
                 .SqlQueryRaw<int>(@"

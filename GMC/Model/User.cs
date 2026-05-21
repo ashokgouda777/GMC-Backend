@@ -307,7 +307,7 @@
         public string? CouncilId { get; set; }
 
         [Key]   // ⭐ MUST BE PRESENT
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string NationalityId { get; set; } = Guid.NewGuid().ToString();
 
         public string? Nationality { get; set; }
@@ -427,13 +427,13 @@
 [Table("tbl_address")]
     public class Address
     {
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
         [Key]
@@ -449,10 +449,10 @@
         [Column(TypeName = "varchar(10)")]
         public string AddressType { get; set; } = "R";   // Default Value
 
-        [Column(TypeName = "varchar(MAX)")]
+        [Column(TypeName = "text")]
         public string? Address1 { get; set; }
 
-        [Column(TypeName = "varchar(MAX)")]
+        [Column(TypeName = "text")]
         public string? Address2 { get; set; }
 
         [Column(TypeName = "varchar(100)")]
@@ -476,7 +476,7 @@
         [Column(TypeName = "varchar(10)")]
         public string? PlaceType { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? District { get; set; }
 
         [Column(TypeName = "varchar(50)")]
@@ -496,34 +496,34 @@
     public class StateMaster
     {
         [Key] // ⚠ If composite key, configure in DbContext (see below)
-        [Column("StateId", TypeName = "nvarchar(50)")]
+        [Column("StateId", TypeName = "varchar(50)")]
         [StringLength(50)]
         public string StateId { get; set; }
 
-        [Column("CountryId", TypeName = "nvarchar(50)")]
+        [Column("CountryId", TypeName = "varchar(50)")]
         [Required]
         [StringLength(50)]
         public string CountryId { get; set; }
 
-        [Column("StateName", TypeName = "nvarchar(50)")]
+        [Column("StateName", TypeName = "varchar(50)")]
         [StringLength(50)]
         public string? StateName { get; set; }
 
-        [Column("CreatedBy", TypeName = "nvarchar(50)")]
+        [Column("CreatedBy", TypeName = "varchar(50)")]
         [StringLength(50)]
         public string? CreatedBy { get; set; }
 
         [Column("CreatedOn")]
         public DateTime? CreatedOn { get; set; }
 
-        [Column("UpdatedBy", TypeName = "nvarchar(50)")]
+        [Column("UpdatedBy", TypeName = "varchar(50)")]
         [StringLength(50)]
         public string? UpdatedBy { get; set; }
 
         [Column("UpdatedOn")]
         public DateTime? UpdatedOn { get; set; }
 
-        [Column("Active", TypeName = "nvarchar(50)")]
+        [Column("Active", TypeName = "varchar(50)")]
         [StringLength(50)]
         public string? Active { get; set; }
     }
@@ -673,36 +673,36 @@
 
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CourseDescription { get; set; }
 
         [Key]   // Assuming CourseId as Primary Key
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CourseId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CourseShortCode { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Status { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
-        // In DB it is nvarchar(50), so keeping string
-        [Column(TypeName = "nvarchar(50)")]
+        // In DB it is varchar(50), so keeping string
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedOn { get; set; }
 
         [Column(TypeName = "varchar(5)")]
         public string? AdditionalDegree { get; set; }
 
-        [Column(TypeName = "nvarchar(200)")]
+        [Column(TypeName = "varchar(200)")]
         public string? CourseNomeclature { get; set; }
     }
 
@@ -733,7 +733,7 @@
 
         public DateTime? UpdatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Status { get; set; }
 
         [Column("university_code", TypeName = "varchar(5)")]
@@ -790,27 +790,27 @@
 
         public DateTime? UpdatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Status { get; set; }
 
         [Column(TypeName = "varchar(50)")]
         public string? UserId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Password { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? FirsttimeLogin { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Photo { get; set; }
 
         public int? Usercount { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Country { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? State { get; set; }
 
         [Column("college_code", TypeName = "varchar(5)")]
@@ -825,51 +825,51 @@
     public class JCouncilMaster
     {
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string CountryId { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string StateId { get; set; }
 
         [Key]   // Assuming CouncilId as Primary Key
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilName { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
         public DateTime? UpdatedOn { get; set; }
 
-        public string? Address { get; set; }   // nvarchar(max)
+        public string? Address { get; set; }   
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? EmailId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Phoneno { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Website { get; set; }
 
-        public string? Logo { get; set; }  // nvarchar(max)
+        public string? Logo { get; set; }  
 
-        public string? BannerName { get; set; }  // nvarchar(max)
+        public string? BannerName { get; set; } 
 
-        public string? Banner { get; set; }  // nvarchar(max)
+        public string? Banner { get; set; } 
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? ShortCode { get; set; }
 
-        [Column("city", TypeName = "nvarchar(50)")]
+        [Column("city", TypeName = "varchar(50)")]
         public string? City { get; set; }
 
         [Column(TypeName = "varchar(200)")]
@@ -884,13 +884,13 @@
 [Table("tbl_renewal_history")]
     public class RenewalHistory
     {
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
         [Key]
@@ -933,7 +933,7 @@
         public string? Status { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string PaymentFor { get; set; } = "R";
 
         [Column(TypeName = "varchar(250)")]
@@ -963,12 +963,12 @@
         [Column(TypeName = "varchar(10)")]
         public string? slNo { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? GroupID { get; set; }
 
         public decimal? AutoReceiptNo { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? AccountNo { get; set; }
 
         [Column(TypeName = "varchar(50)")]
@@ -989,10 +989,10 @@
         [Column(TypeName = "varchar(300)")]
         public string? Comments { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? councilname { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? counciladdre { get; set; }
 
         [Column(TypeName = "varchar(100)")]
@@ -1006,13 +1006,13 @@
 [Table("tbl_renewal_items")]
     public class RenewalItems
     {
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
         [Required]
@@ -1045,50 +1045,50 @@
     public class GroupLedgerMaster
     {
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string CouncilId { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? GroupID { get; set; }
 
         [Key]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string LedgerID { get; set; }
 
         [Required]
         public int LedgerCount { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? LedgerName { get; set; }
 
-        [Column(TypeName = "nvarchar(100)")]
+        [Column(TypeName = "varchar(100)")]
         public string? LedgerDescription { get; set; }
 
-        [Column(TypeName = "nchar(10)")]
+        [Column(TypeName = "char(10)")]
         public string? Type { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [Column(TypeName = "varchar(10)")]
         public string? Certificate_Type { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [Column(TypeName = "varchar(10)")]
         public string? LedgerStatus { get; set; }
 
-        [Column(TypeName = "nvarchar(5)")]
+        [Column(TypeName = "varchar(5)")]
         public string? Status { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
         public DateTime? UpdatedOn { get; set; }
@@ -1101,22 +1101,22 @@
         [Key]
         public int FinYearrId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? YearCode { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? FinancialYear { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
-        // In database UpdatedOn is nvarchar(50), so string
-        [Column(TypeName = "nvarchar(50)")]
+        // In database UpdatedOn is varchar(50), so string
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedOn { get; set; }
     }
 
@@ -1126,33 +1126,33 @@
     public class FeesItems
     {
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string CouncilId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
         [Key]
         public int FeeItemId { get; set; }
 
-        [Column(TypeName = "nvarchar(250)")]
+        [Column(TypeName = "varchar(250)")]
         public string? FeeItemName { get; set; }
 
         [Column(TypeName = "decimal(18,0)")]
         public decimal? FeeAmount { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [Column(TypeName = "varchar(10)")]
         public string? Status { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
         public DateTime? UpdatedOn { get; set; }
@@ -1161,13 +1161,13 @@
 [Table("tbl_Fees_Receipt")]
     public class FeesReceipt
     {
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
         public string? GroupID { get; set; }
@@ -1188,7 +1188,7 @@
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Amount { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [Column(TypeName = "varchar(10)")]
         public string? Type { get; set; }
 
         public string? CourseCode { get; set; }
@@ -1203,7 +1203,7 @@
 
         public string? Remarks { get; set; }
 
-        [Column(TypeName = "nvarchar(2)")]
+        [Column(TypeName = "varchar(2)")]
         public string? Remited_NotRemited { get; set; }
 
         public string? Contra_Remarks { get; set; }
@@ -1232,10 +1232,10 @@
 
         public int? receipt { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? ipaddress { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? ProgramId { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
@@ -1251,34 +1251,34 @@
         public string? CountryId { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string CouncilId { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? LedgerID { get; set; }
 
         [Key]   // ✅ ADD THIS
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string FeeItemID { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [Column(TypeName = "varchar(10)")]
         public string? Certificate_Type { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CreatedBy { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? UpdatedBy { get; set; }
 
         public DateTime? UpdatedOn { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? Status { get; set; }
     }
 
@@ -1382,13 +1382,13 @@
     [Table("tbl_mds_subject_master")]
     public class MdsSubjectMaster
     {
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CountryId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? StateId { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CouncilId { get; set; }
 
         [Key]
@@ -1412,7 +1412,7 @@
         [Column(TypeName = "varchar(50)")]
         public string? ShortCode { get; set; }
 
-        [Column(TypeName = "nvarchar(50)")]
+        [Column(TypeName = "varchar(50)")]
         public string? CourseId { get; set; }
 
         [Column(TypeName = "varchar(10)")]

@@ -180,7 +180,7 @@ namespace GMC.Controllers
                                     Vote = statusofregistration,
                                     EmailID = email,
                                     MobileNumber = mobileno,
-                                    CreatedOn = DateTime.Now,
+                                    CreatedOn = DateTime.UtcNow,
                                     CreatedBy = "Old Record",
                                     status = statusexist,
                                     Remarks= remark,
@@ -202,7 +202,7 @@ namespace GMC.Controllers
                                 Password = "not set",
                                 userId = practitionerid,
                                 Role_Id = "2",
-                                CreatedOn = DateTime.Now,
+                                CreatedOn = DateTime.UtcNow,
                                 CreatedBy = "Old Record"
                             };
 
@@ -234,7 +234,7 @@ namespace GMC.Controllers
                                     District = districtcode,
 
                                     CreatedBy = "Old record",
-                                    CreatedOn = DateTime.Now
+                                    CreatedOn = DateTime.UtcNow
                                 };
 
 
@@ -288,7 +288,7 @@ namespace GMC.Controllers
                                         Directory.CreateDirectory(@"D:\ErrorLogs");
                                     }
 
-                                    string logMessage = $"RegNo: {regno} | Error: {e.Message} | Time: {DateTime.Now}";
+                                    string logMessage = $"RegNo: {regno} | Error: {e.Message} | Time: {DateTime.UtcNow}";
                                     System.IO.File.AppendAllText(logPath, logMessage + Environment.NewLine);
                                     // Append to file (Notepad file)
                                  
@@ -334,7 +334,7 @@ namespace GMC.Controllers
 
                             IsIssued = "yes",
                             CreatedBy = "Old data",
-                            CreatedOn = DateTime.Now,
+                            CreatedOn = DateTime.UtcNow,
                             Active = "A"
                         };
 
@@ -348,7 +348,7 @@ namespace GMC.Controllers
 
             do
             {
-                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
                 int random = rnd.Next(100, 999);
                 id = $"{type}{timestamp}{random}";
 
@@ -362,7 +362,126 @@ namespace GMC.Controllers
                 return d;
             return null;
         }
-       
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost("import-users")]
+        public async Task<IActionResult> ImportUsers(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Please upload excel file.");
+
+            var users = new List<User>();
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        try
+                        {
+                            string username = worksheet.Cells[row, 1].Text.Trim();
+
+                            if (string.IsNullOrEmpty(username))
+                                continue;
+
+                            bool exists = await _context.Users
+                                .AnyAsync(x => x.UserName == username);
+
+                            if (exists)
+                                continue;
+
+                            var user = new User
+                            {
+                                CountryId = worksheet.Cells[row, 2].Text,
+                                StateId = worksheet.Cells[row, 3].Text,
+                                CouncilId = worksheet.Cells[row, 4].Text,
+
+                                Site_Id = int.TryParse(
+                                    worksheet.Cells[row, 5].Text,
+                                    out int siteid)
+                                    ? siteid
+                                    : null,
+
+                                UserName = username,
+                                Password = worksheet.Cells[row, 6].Text,
+                                Status = worksheet.Cells[row, 7].Text,
+                                Name = worksheet.Cells[row, 8].Text,
+                                Role_Id = worksheet.Cells[row, 9].Text,
+                                Email_Id = worksheet.Cells[row, 10].Text,
+                                MobileNo = worksheet.Cells[row, 11].Text,
+
+                                CreatedOn = DateTime.UtcNow,
+
+                                CreatedBy = worksheet.Cells[row, 12].Text,
+                                UpdatedBy = worksheet.Cells[row, 13].Text,
+
+                                District = worksheet.Cells[row, 14].Text,
+                                Photo = worksheet.Cells[row, 15].Text,
+
+                                usercount = int.TryParse(
+                                    worksheet.Cells[row, 16].Text,
+                                    out int usercount)
+                                    ? usercount
+                                    : null,
+
+                                Firsttime_login = worksheet.Cells[row, 17].Text,
+                                userId = worksheet.Cells[row, 18].Text,
+                                RegType = worksheet.Cells[row, 19].Text,
+                                typeUser = worksheet.Cells[row, 20].Text,
+                                ipaddress = worksheet.Cells[row, 21].Text
+                            };
+
+                            users.Add(user);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+            }
+
+            if (users.Count > 0)
+            {
+                await _context.Users.AddRangeAsync(users);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                Message = "Users imported successfully",
+                Count = users.Count
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }
